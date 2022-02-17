@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+  dd-agent:
+    container_name: dd-agent
+    hostname: dd-agent
+    image: gcr.io/datadoghq/agent:7
+    restart: always
+    environment:
+      - DD_API_KEY=${DD_API_KEY}
+      - DD_LOGS_ENABLED=true
+      - DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL=true
+      - DD_PROCESS_AGENT=true
+      - DD_LOG_LEVEL=debug
+      # - DD_HOSTNAME=dd-agent
+      - DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true
+      - DD_SITE=datadoghq.com
+    # volumes:
+    #   - /var/run/docker.sock:/var/run/docker.sock
+    #   - /proc/:/host/proc/:ro
+    #   - /sys/fs/cgroup:/host/sys/fs/cgroup:ro
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: node_js_app
+    restart: always
+    volumes:
+      - ./:/src
+    ports:
+      - '3000:3000'
+    environment:
+      - DD_API_KEY=${DD_API_KEY}
+    entrypoint:
+      - yarn
+      - start
